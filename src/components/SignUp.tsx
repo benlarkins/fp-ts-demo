@@ -23,7 +23,7 @@ type ErrorState = {
     password?: string[];
 }
 
-export const Login = () => {
+export const SignUp = () => {
     const [identifier, setIdentifier] = useState('');
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);

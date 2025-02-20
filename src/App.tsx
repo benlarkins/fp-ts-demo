@@ -3,7 +3,7 @@ import { Provider } from 'react-redux';
 import { BrowserRouter as Router, Navigate, Routes, Route } from 'react-router-dom';
 
 import { store } from '@/store/store';
-import { Login } from '@/components/Login';
+import { SignUp } from '@/components/SignUp';
 import { Provider as ChakraProvider } from '@/components/ui/provider';
 
 function App() {
@@ -12,7 +12,7 @@ function App() {
       <ChakraProvider>
         <Router>
           <Routes>
-            <Route path="/" element={<Login />} />
+            <Route path="/" element={<SignUp />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Router>
