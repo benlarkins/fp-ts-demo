@@ -14,9 +14,9 @@ import {
 import { LogIn } from 'lucide-react';
 
 import { Field } from '@/components/ui/field';
-import { PasswordInput, PasswordStrengthMeter } from '@/components/ui/password-input';
-import { toaster } from '@/components/ui/toaster';
-import { validateLogin, validatePassword, validatePasswordLength } from '@/utils/validation';
+import { PasswordInput } from '@/components/ui/password-input';
+import { Toaster, toaster } from '@/components/ui/toaster';
+import { validateLogin, validatePassword } from '@/utils/validation';
 
 type ErrorState = {
     identifier?: string;
@@ -29,26 +29,6 @@ export const Login = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [hasValidLogin, setHasValidLogin] = useState(false);
     const [errors, setErrors] = useState<ErrorState>({ identifier: '', password: [] });
-    console.log(errors.password?.length);
-
-    // const validateForm = () => {
-    //     const newErrors: { identifier?: string; password?: string } = {};
-
-    //     if (!identifier) {
-    //         newErrors.identifier = 'Email or phone number is required';
-    //     } else if (!isValidIdentifier(identifier)) {
-    //         newErrors.identifier = 'Please enter a valid email or phone number';
-    //     }
-
-    //     if (!password) {
-    //         newErrors.password = 'Password is required';
-    //     } else if (password.length < 8) {
-    //         newErrors.password = 'Password must be at least 8 characters';
-    //     }
-
-    //     setErrors(newErrors);
-    //     return Object.keys(newErrors).length === 0;
-    // };
 
     function validateLoginIdentifier(errState: ErrorState): ErrorState {
         let updatedErrorState = { ...errState };
@@ -74,7 +54,7 @@ export const Login = () => {
             updatedErrorState = { ...updatedErrorState, password: [...e] };
         },
         () => {
-            setErrors({ ...errors, password: [] });
+            updatedErrorState = { ...errors, password: [] };
         })(isValidPassword);
 
         return updatedErrorState;
@@ -89,82 +69,36 @@ export const Login = () => {
         }
         
         updatedErrors = validateLoginIdentifier(updatedErrors);
-        console.log('updatedErrors', updatedErrors);
         setErrors(updatedErrors);
 
-        console.log('validate password', validatePassword(password));
-        // pipe(
-        //     isValidLogin,
-        //     E.match(
-        //         (error) => {
-        //             if (error.type === 'Malformed email') {
-        //                 setErrors({ identifier: 'Invalid email' });
-        //                 setHasValidLogin(false);
-        //             }
-                    
-        //             if (error.type === 'Not a phone number') {
-        //                 setErrors({ identifier: 'Invalid phone number/email' });
-        //                 setHasValidLogin(false);
-        //             }
-        //         },
-        //         (valid) => {
-        //             setHasValidLogin(true);
-        //             setErrors({});
-        //         }
-        //     )
-        // );
-        // pipe(
-        //     passwordIsCorrectLength,
-        //     E.match(
-        //         (error) => error.message,
-        //         () => '',
-        //     )
-        // );
-        // pipe(
-        //     passwordHasSpecialCharacter,
-        //     E.match(
-        //         (error) => {
-        //             setErrors({ password: error.message });
-        //         },
-        //         () => {
-        //             setErrors({});
-        //         }
-        //     )
-        // );
+        if (!updatedErrors.identifier && !updatedErrors.password?.length && password.length) {
+            setIsLoading(true);
 
-        // console.log('isValid', isValidLogin);
-        // if (!validateForm()) return;
+            try {
+                // TODO: Implement actual login logic here
+                await new Promise(resolve => setTimeout(resolve, 1000)); // Simulated API call
 
-        // if (E.isRight(isValidLogin) && E.isRight(passwordHasSpecialCharacter)) {
-        //     setHasValidLogin(true);
-        //     setIsLoading(true);
-
-        //     try {
-        //         // TODO: Implement actual login logic here
-        //         await new Promise(resolve => setTimeout(resolve, 1000)); // Simulated API call
-
-        //         toaster.create({
-        //             title: 'Login Successful',
-        //             type: 'success',
-        //             duration: 3000,
-        //             // isClosable: true,
-        //         });
-        //     } catch (error) {
-        //         toaster.create({
-        //             title: 'Login Failed',
-        //             description: 'Please check your credentials and try again.',
-        //             type: 'error',
-        //             duration: 3000,
-        //             // isClosable: true,
-        //         });
-        //     } finally {
-        //         setIsLoading(false);
-        //     }
-        // }
+                toaster.create({
+                    title: 'Sign Up Successful',
+                    type: 'success',
+                    duration: 3000,
+                });
+            } catch (error) {
+                toaster.create({
+                    title: 'Sign Up Failed',
+                    description: 'Please check your credentials and try again.',
+                    type: 'error',
+                    duration: 3000,
+                });
+            } finally {
+                setIsLoading(false);
+            }
+        }
     };
 
     return (
         <Container maxW="container.sm" py={10}>
+            <Toaster />
             <Box
                 p={8}
                 borderWidth={2}
@@ -179,8 +113,8 @@ export const Login = () => {
                         <Icon fontSize="40px">
                             <LogIn />
                         </Icon>
-                        <Heading size="lg" mb={2}>Welcome Back</Heading>
-                        <Text color="gray.300">Sign in to continue</Text>
+                        <Heading size="lg" mb={2}>Welcome</Heading>
+                        <Text color="gray.300">Sign up to continue</Text>
                     </Box>
 
                     <form onSubmit={handleSubmit}>
@@ -219,21 +153,18 @@ export const Login = () => {
                                         placeholder="Password"
                                         value={password}
                                     />
-                                    {/* <PasswordStrengthMeter value={passwordStrength} /> */}
 
                                 </Field>
                             </Presence>
 
                             <Button
-                                // colorScheme="blue"
                                 loading={isLoading}
-                                loadingText="Signing in..."
-                                // mt={4}
+                                loadingText="Signing up..."
                                 type="submit"
                                 variant="solid"
                                 width="full"
                             >
-                                Sign In
+                                Sign Up
                             </Button>
                         </VStack>
                     </form>
