@@ -1,5 +1,5 @@
+import React, { useMemo, useState } from 'react';
 import * as E from 'fp-ts/Either'
-import React, { useState } from 'react';
 import {
     Box,
     Button,
@@ -18,72 +18,72 @@ import { PasswordInput } from '@/components/ui/password-input';
 import { Toaster, toaster } from '@/components/ui/toaster';
 import { validateLogin, validatePassword } from '@/utils/validation';
 
-type ErrorState = {
-    identifier?: string;
-    password?: string[];
+function validateLoginIdentifier(identifier: string): string {
+    const isValidLogin = validateLogin(identifier);
+    let errorMessage = '';
+
+    E.match(() => {
+        errorMessage = 'Please enter a valid email or phone number';
+    },
+    () => {})(isValidLogin);
+
+    return errorMessage;
 }
 
+function validatePasswordInput(password: string): string[] {
+    const isValidPassword = validatePassword(password);
+    let passwordErrors: string[] = [];
+
+    E.match((e: string[]) => {
+        passwordErrors = [...e];
+    },
+    () => {})(isValidPassword);
+
+    return passwordErrors;
+}
+
+
 export const SignUp = () => {
-    const [identifier, setIdentifier] = useState('');
-    const [password, setPassword] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
-    const [hasValidLogin, setHasValidLogin] = useState(false);
-    const [errors, setErrors] = useState<ErrorState>({ identifier: '', password: [] });
+    const [hasSubmitted, setHasSubmitted] = useState<boolean>(false);
+    const [hasSubmittedPassword, setHasSubmittedPassword] = useState<boolean>(false);
+    const [hasSubmittedValidLogin, setHasSubmittedValidLogin] = useState<boolean>(false);
+    const [identifier, setIdentifier] = useState<string>('');
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [password, setPassword] = useState<string>('');
 
-    function validateLoginIdentifier(errState: ErrorState): ErrorState {
-        let updatedErrorState = { ...errState };
-        const isValidLogin = validateLogin(identifier);
-
-        E.match(() => {
-            updatedErrorState = { ...updatedErrorState, identifier: 'Please enter a valid email or phone number' };
-        },
-        () => {
-            updatedErrorState = { ...updatedErrorState, identifier: '' };
-            setHasValidLogin(true);
-        })(isValidLogin);
-
-        return updatedErrorState;
-    }
-
-    function validatePasswordInput(errState: ErrorState): ErrorState {
-        let updatedErrorState = { ...errState };
-        const isValidPassword = validatePassword(password);
-
-        E.match((e: string[]) => {
-            console.log('error', e);
-            updatedErrorState = { ...updatedErrorState, password: [...e] };
-        },
-        () => {
-            updatedErrorState = { ...errors, password: [] };
-        })(isValidPassword);
-
-        return updatedErrorState;
-    }
+    // These are derived states.
+    const identifierError = useMemo(() => validateLoginIdentifier(identifier), [identifier]);
+    const passwordErrors = useMemo(() => validatePasswordInput(password), [password]);
 
     const handleSubmit = async (e: React.FormEvent) => {
-        let updatedErrors = { ...errors };
         e.preventDefault();
 
-        if (hasValidLogin) {
-            updatedErrors = validatePasswordInput(updatedErrors);
+        if (!hasSubmitted) {
+            setHasSubmitted(true);
         }
-        
-        updatedErrors = validateLoginIdentifier(updatedErrors);
-        setErrors(updatedErrors);
 
-        if (!updatedErrors.identifier && !updatedErrors.password?.length && password.length) {
+        if (!hasSubmittedValidLogin && !identifierError) {
+            setHasSubmittedValidLogin(true);
+        }
+
+        if (!hasSubmittedPassword && password.length) {
+            setHasSubmittedPassword(true);
+        }
+
+        if (!identifierError && !passwordErrors?.length && password.length) {
             setIsLoading(true);
 
             try {
-                // TODO: Implement actual login logic here
                 await new Promise(resolve => setTimeout(resolve, 1000)); // Simulated API call
 
+                // Here you would typically handle the API call for signing up
                 toaster.create({
                     title: 'Sign Up Successful',
                     type: 'success',
                     duration: 3000,
                 });
             } catch (error) {
+                // Handle error. Let the user know the sign up failed
                 toaster.create({
                     title: 'Sign Up Failed',
                     description: 'Please check your credentials and try again.',
@@ -119,12 +119,10 @@ export const SignUp = () => {
 
                     <form onSubmit={handleSubmit}>
                         <VStack spaceY={4}>
-                            {/* <FormControl isInvalid={!!errors.identifier}>
-                                <FormLabel>Email or Phone Number</FormLabel> */}
                             <Field
                                 label="Email or Phone Number"
-                                invalid={!!errors.identifier}
-                                errorText={errors.identifier}
+                                invalid={hasSubmitted && identifierError.length > 0}
+                                errorText={identifierError}
                             >
                                 <Input
                                     type="text"
@@ -136,14 +134,14 @@ export const SignUp = () => {
                             </Field>
 
                             <Presence
-                                present={hasValidLogin}
+                                present={hasSubmittedValidLogin}
                                 width="100%"
                             >
                                 <Field
                                     label="Password"
-                                    invalid={Boolean(errors.password?.length)}
+                                    invalid={hasSubmittedPassword && Boolean(passwordErrors?.length)}
                                     errorText={
-                                        errors.password?.map((v, i) => <Text style={{ display: 'flex' }} key={i}>
+                                        passwordErrors?.map((v, i) => <Text style={{ display: 'flex' }} key={i}>
                                             {i > 0 ? v.replace('Password must', ' and') : v}
                                         </Text>)
                                     }
