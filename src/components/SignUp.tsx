@@ -1,5 +1,4 @@
 import React, { useMemo, useState } from 'react';
-import * as E from 'fp-ts/Either'
 import {
     Box,
     Button,
@@ -11,6 +10,7 @@ import {
     Text,
     VStack,
 } from '@chakra-ui/react';
+import * as E from 'fp-ts/Either'
 import { LogIn } from 'lucide-react';
 
 import { Field } from '@/components/ui/field';
@@ -19,29 +19,18 @@ import { Toaster, toaster } from '@/components/ui/toaster';
 import { validateLogin, validatePassword } from '@/utils/validation';
 
 function validateLoginIdentifier(identifier: string): string {
-    const isValidLogin = validateLogin(identifier);
-    let errorMessage = '';
-
-    E.match(() => {
-        errorMessage = 'Please enter a valid email or phone number';
-    },
-    () => {})(isValidLogin);
-
-    return errorMessage;
+    return E.match(
+        () => 'Please enter a valid email or phone number',
+        () => ''
+    )(validateLogin(identifier));
 }
 
 function validatePasswordInput(password: string): string[] {
-    const isValidPassword = validatePassword(password);
-    let passwordErrors: string[] = [];
-
-    E.match((e: string[]) => {
-        passwordErrors = [...e];
-    },
-    () => {})(isValidPassword);
-
-    return passwordErrors;
+    return E.match(
+        (errors: string[]) => errors,
+        () => []
+    )(validatePassword(password));
 }
-
 
 export const SignUp = () => {
     const [hasSubmitted, setHasSubmitted] = useState<boolean>(false);
@@ -52,8 +41,8 @@ export const SignUp = () => {
     const [password, setPassword] = useState<string>('');
 
     // These are derived states.
-    const identifierError = useMemo(() => validateLoginIdentifier(identifier), [identifier]);
-    const passwordErrors = useMemo(() => validatePasswordInput(password), [password]);
+    const identifierError = useMemo<string>(() => validateLoginIdentifier(identifier), [identifier]);
+    const passwordErrors = useMemo<string[]>(() => validatePasswordInput(password), [password]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
