@@ -49,12 +49,12 @@ const validatePhoneNumber = flow(
 );
 
 // This is a simple check to see if the password has a special character
-export const validatePasswordHasSpecialCharacter = (password: string): boolean => {
+const validatePasswordHasSpecialCharacter = (password: string): boolean => {
     return /[\d!@#$%^&*()_+?",.<>]/.test(password);
 }
 
 // This is a simple check to see if the password is at least 8 characters long
-export const validatePasswordLength = (password: string): boolean => password.length >= 8;
+const validatePasswordLength = (password: string): boolean => password.length >= 8;
 
 // Check a user's login input. If it's an email then run email validation, otherwise check if it's a phone number
 export const validateLogin = (loginInput: string) => pipe(
