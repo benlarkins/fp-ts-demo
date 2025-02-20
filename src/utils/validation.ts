@@ -98,7 +98,7 @@ const liftedPasswordHasSpecialCharacters = lift((password: string) => pipe(
 
 // Validate the password using the lifted validations
 // This will return an Either with a NonEmptyArray of errors if any of the validations fail
-// This is important so that we can show the user all the errors at once rather than one error at a time
+// This is important for UX so that we can show the user all the errors at once 
 export function validatePassword(password: string): E.Either<NonEmptyArray<string>, string> {
     return pipe(
         sequenceT(applicativeValidation)(
