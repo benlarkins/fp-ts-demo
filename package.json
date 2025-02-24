@@ -8,7 +8,7 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test": "jest"
+    "test": "npx jest"
   },
   "dependencies": {
     "@chakra-ui/react": "^3.8.0",

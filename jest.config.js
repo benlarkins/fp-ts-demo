@@ -1,6 +1,6 @@
 export default {
     preset: 'ts-jest',
-    testEnvironment: 'node',
+    testEnvironment: 'jsdom',
     extensionsToTreatAsEsm: ['.ts', '.tsx'],
     globals: {
         'ts-jest': {
@@ -11,4 +11,5 @@ export default {
     moduleNameMapper: {
         '^@/(.*)$': '<rootDir>/src/$1'
     },
+    setupFilesAfterEnv: ['<rootDir>/jest.setup.ts']
 };
